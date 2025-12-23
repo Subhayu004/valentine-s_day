@@ -400,7 +400,13 @@ export default function App() {
     const audio = new Audio("/music.mp3");
     audio.loop = true;
     audio.preload = "auto";
+    // Set initial volume to ensure it's audible
+    audio.volume = 0.7;
     backgroundAudioRef.current = audio;
+
+    // Try to load the audio file
+    audio.load();
+
     return () => {
       audio.pause();
       backgroundAudioRef.current = null;
@@ -410,15 +416,35 @@ export default function App() {
   const playBackgroundMusic = useCallback(() => {
     const audio = backgroundAudioRef.current;
     if (!audio) {
+      console.warn('Audio element not initialized');
       return;
     }
     if (!audio.paused) {
+      console.log('Audio already playing');
       return;
     }
+
+    // Reset to beginning
     audio.currentTime = 0;
-    void audio.play().catch(() => {
-      // ignore play errors (browser might block)
-    });
+
+    // Attempt to play with better error handling
+    const playPromise = audio.play();
+
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          console.log('Background music started successfully');
+        })
+        .catch((error) => {
+          console.warn('Audio play failed:', error);
+          // On mobile, sometimes we need to try again after a short delay
+          setTimeout(() => {
+            audio.play().catch((retryError) => {
+              console.error('Audio play retry failed:', retryError);
+            });
+          }, 100);
+        });
+    }
   }, []);
 
   const typingComplete = currentLineIndex >= TYPED_LINES.length;
@@ -520,10 +546,15 @@ export default function App() {
     };
 
     const handleClick = (event: MouseEvent | TouchEvent) => {
-      event.preventDefault();
       if (!hasStarted) {
+        event.preventDefault();
+        // Play audio first, then update state
+        // This ensures audio starts within the user gesture event
         playBackgroundMusic();
-        setHasStarted(true);
+        // Small delay to ensure audio context is unlocked
+        setTimeout(() => {
+          setHasStarted(true);
+        }, 50);
       }
     };
 
