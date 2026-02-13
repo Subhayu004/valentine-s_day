@@ -78,9 +78,9 @@ const BACKGROUND_FADE_START = Math.max(
 );
 
 const TYPED_LINES = [
-  "> Happy Birthday, Srey! 🎂✨",
-  "> May your day be filled with joy, laughter, and wonderful surprises! �",
-  "> Made with love by Subhayu 💝"
+  "> Happy Valentine's Day, Pritha! 🎂✨",
+  "> Take my hand, take my whole life too, but I can't help falling in love with you 💖",
+  "> Made with love by Parthib 💝"
 ];
 const TYPED_CHAR_DELAY = 100;
 const POST_TYPING_SCENE_DELAY = 1000;
